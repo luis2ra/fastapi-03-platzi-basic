@@ -1,5 +1,6 @@
-from fastapi import FastAPI, Body
+from fastapi import FastAPI, Body, Path, Query
 from fastapi.responses import HTMLResponse, JSONResponse
+from movie_schema import Movie
 
 
 app = FastAPI()
@@ -32,11 +33,12 @@ def message():
 
 @app.get('/movies', tags=['movies',])
 def get_movies():
-    return JSONResponse(movies)
+    print(movies)
+    return movies  # usaba JSONResponse pero no es compatible con Movie
 
 
 @app.get('/movies/{id}', tags=['movies',])
-def get_movie(id: int):
+def get_movie(id: int = Path(ge=1, le=2000)):
     for item in movies:
         if item["id"] == id:
             return item
@@ -44,32 +46,25 @@ def get_movie(id: int):
 
 
 @app.get('/movies/', tags=['movies',])
-def get_movies_by_category(category: str, year: int):
+def get_movies_by_category(category: str = Query(min_length=5, max_length=15), year: int = Query(le=2023)):
     return [item for item in movies if category in item['category'] and item['year'] == str(year)]
 
 
 @app.post('/movies', tags=['movies',])
-def create_movie(id: int = Body(), title: str = Body(), overview: str = Body(), year: int = Body(), rating: float = Body(), category: str = Body()):
-    movies.append({
-        "id": id,
-        "title": title,
-        "overview": overview,
-        "year": year,
-        "rating": rating,
-        "category": category
-    })
+def create_movie(movie: Movie):
+    movies.append(movie)
     return movies[-1]
 
 
 @app.put('/movies/{id}', tags=['movies',])
-def update_movie(id: int, title: str = Body(), overview: str = Body(), year: int = Body(), rating: float = Body(), category: str = Body()):
+def update_movie(id: int, movie: Movie):
     for item in movies:
         if item["id"] == id:
-            item['title'] = title
-            item['overview'] = overview
-            item['year'] = year
-            item['rating'] = rating
-            item['category'] = category
+            item['title'] = movie.title
+            item['overview'] = movie.overview
+            item['year'] = movie.year
+            item['rating'] = movie.rating
+            item['category'] = movie.category
             return movies
     return []
 
