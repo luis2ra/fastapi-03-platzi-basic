@@ -1,5 +1,5 @@
 from fastapi import FastAPI, Body
-from fastapi.responses import HTMLResponse
+from fastapi.responses import HTMLResponse, JSONResponse
 
 
 app = FastAPI()
@@ -32,7 +32,7 @@ def message():
 
 @app.get('/movies', tags=['movies',])
 def get_movies():
-    return movies
+    return JSONResponse(movies)
 
 
 @app.get('/movies/{id}', tags=['movies',])
@@ -58,7 +58,7 @@ def create_movie(id: int = Body(), title: str = Body(), overview: str = Body(), 
         "rating": rating,
         "category": category
     })
-    return movies
+    return movies[-1]
 
 
 @app.put('/movies/{id}', tags=['movies',])
@@ -80,7 +80,7 @@ def delete_movie(id: int):
         if item["id"] == id:
             movies.remove(item)
             return movies
-    return {"message": "La pelicula con el id "+ str(id) + " no existe!"}
+    return {"message": "La pelicula con el id " + str(id) + " no existe!"}
 
 
 '''
